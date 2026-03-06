@@ -1,4 +1,4 @@
-cd queries/
+cd queries
 GR='\033[0;32m'
 NC='\033[0m' # No Color
 echo -e "Building ${GR}tr1...${NC}"

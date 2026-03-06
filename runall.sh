@@ -1,4 +1,4 @@
-cd runqueries/
+cd runqueries
 GR='\033[0;32m'
 NC='\033[0m' # No Color
 echo -e "Running ${GR}tr1...${NC}"
