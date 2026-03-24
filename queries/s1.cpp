@@ -81,23 +81,29 @@ uint32_t maximum_in_table(std::vector<std::vector<uint32_t>> &table, uint8_t n_c
 std::vector<std::vector<uint32_t>>* read_relation_inverted(const std::string filename, uint8_t n_Atts)
 {
     std::ifstream input_stream(filename);
-    if (!input_stream) return nullptr; // Seguridad: archivo no encontrado
+    if (!input_stream) return nullptr;
 
     uint32_t x;
-    auto* relation = new std::vector<std::vector<uint32_t>>();
+    uint8_t i;
+
+    std::vector<std::vector<uint32_t>>* relation;
+    std::vector<uint32_t> tuple;
+
+    relation = new std::vector<std::vector<uint32_t>>();
 
     while (input_stream >> x) {
-        // Pre-reservamos el tamaño para evitar reasignaciones
-        std::vector<uint32_t> tuple(n_Atts);
-
-        // Insertamos desde la última posición (n_Atts - 1) hasta la 0
-        for (int i = n_Atts - 1; i >= 0; i--) {
-            tuple[i] = x;
-            if (i > 0) { // Solo leemos el siguiente si no es el último del ciclo for
+        tuple.clear();
+        for (i = 0; i < n_Atts; i++) {
+            tuple.push_back(x);
+            // Solo leemos el siguiente si no hemos terminado la tupla actual
+            if (i < n_Atts - 1) {
                 input_stream >> x;
             }
         }
-        relation->push_back(std::move(tuple)); // use move para evitar copiar el vector interno
+
+        std::reverse(tuple.begin(), tuple.end());
+
+        relation->push_back(tuple);
     }
 
     return relation;
