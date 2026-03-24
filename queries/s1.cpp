@@ -78,17 +78,29 @@ uint32_t maximum_in_table(std::vector<std::vector<uint32_t>> &table, uint8_t n_c
     return max_temp;
 }
 
-void invertirTuplas(std::vector<std::vector<uint32_t>>* rel_U) {
-    // Verificamos que el puntero no sea nulo por seguridad
-    if (!rel_U) return;
+std::vector<std::vector<uint32_t>>* read_relation_inverted(const std::string filename, uint8_t n_Atts)
+{
+    std::ifstream input_stream(filename);
+    if (!input_stream) return nullptr; // Seguridad: archivo no encontrado
 
-    // Iteramos por referencia sobre el vector desreferenciado
-    for (auto& tupla : *rel_U) {
-        // Buena práctica: asegurarnos de que hay al menos 2 elementos
-        if (tupla.size() >= 2) {
-            std::swap(tupla[0], tupla[1]);
+    uint32_t x;
+    auto* relation = new std::vector<std::vector<uint32_t>>();
+
+    while (input_stream >> x) {
+        // Pre-reservamos el tamaño para evitar reasignaciones
+        std::vector<uint32_t> tuple(n_Atts);
+
+        // Insertamos desde la última posición (n_Atts - 1) hasta la 0
+        for (int i = n_Atts - 1; i >= 0; i--) {
+            tuple[i] = x;
+            if (i > 0) { // Solo leemos el siguiente si no es el último del ciclo for
+                input_stream >> x;
+            }
         }
+        relation->push_back(std::move(tuple)); // use move para evitar copiar el vector interno
     }
+
+    return relation;
 }
 
 int main(int argc, char** argv)
@@ -108,9 +120,8 @@ int main(int argc, char** argv)
     std::vector<std::vector<uint32_t>>* rel_R = read_relation(strRel_R, att_R.size());
     std::vector<std::vector<uint32_t>>* rel_S = read_relation(strRel_S, att_S.size());
     std::vector<std::vector<uint32_t>>* rel_T = read_relation(strRel_T, att_T.size());
-    std::vector<std::vector<uint32_t>>* rel_U = read_relation(strRel_U, att_U.size());
+    std::vector<std::vector<uint32_t>>* rel_U = read_relation_inverted(strRel_U, att_U.size());
 
-    invertirTuplas(rel_U);
 
     uint32_t grid_side = 0;
     

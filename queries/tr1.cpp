@@ -63,6 +63,31 @@ std::vector<std::vector<uint32_t>>* read_relation(const std::string filename, ui
     return relation;
 }
 
+std::vector<std::vector<uint32_t>>* read_relation_inverted(const std::string filename, uint8_t n_Atts)
+{
+    std::ifstream input_stream(filename);
+    if (!input_stream) return nullptr; // Seguridad: archivo no encontrado
+
+    uint32_t x;
+    auto* relation = new std::vector<std::vector<uint32_t>>();
+
+    while (input_stream >> x) {
+        // Pre-reservamos el tamaño para evitar reasignaciones
+        std::vector<uint32_t> tuple(n_Atts);
+
+        // Insertamos desde la última posición (n_Atts - 1) hasta la 0
+        for (int i = n_Atts - 1; i >= 0; i--) {
+            tuple[i] = x;
+            if (i > 0) { // Solo leemos el siguiente si no es el último del ciclo for
+                input_stream >> x;
+            }
+        }
+        relation->push_back(std::move(tuple)); // use move para evitar copiar el vector interno
+    }
+
+    return relation;
+}
+
 
 uint32_t maximum_in_table(std::vector<std::vector<uint32_t>> &table, uint8_t n_columns, uint32_t max_temp)
 {
@@ -104,9 +129,7 @@ int main(int argc, char** argv)
     
     std::vector<std::vector<uint32_t>>* rel_R = read_relation(strRel_R, att_R.size());
     std::vector<std::vector<uint32_t>>* rel_S = read_relation(strRel_S, att_S.size());
-    std::vector<std::vector<uint32_t>>* rel_T = read_relation(strRel_T, att_T.size());
-
-    invertirTuplas(rel_T);
+    std::vector<std::vector<uint32_t>>* rel_T = read_relation_inverted(strRel_T, att_T.size());
     
     uint32_t grid_side = 0;
     
@@ -157,7 +180,6 @@ int main(int argc, char** argv)
     time_span = duration_cast<microseconds>(stop - start);
     total_time = time_span.count();    
 
-    cout << /*"Multiway Join ended in " <<*/ total_time /*<< " seconds"*/ << endl;
     cout << /*"Multiway Join ended in " <<*/ total_time /*<< " seconds"*/ << endl;
 
     uint64_t bits = 0;
